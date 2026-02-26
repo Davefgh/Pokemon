@@ -1,17 +1,21 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import '../config/api.dart';
 import 'pokemon.dart';
 
 class PokemonService {
-  static const String baseUrl = 'https://pokeapi.co/api/v2/pokemon/';
+  final Dio _dio = Dio();
 
   Future<Pokemon> fetchPokemon(String name) async {
-    final response = await http.get(Uri.parse('$baseUrl$name'));
+    try {
+      final response = await _dio.get('${ApiEndpoints.baseUrl}$name');
 
-    if (response.statusCode == 200) {
-      return Pokemon.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load pokemon: $name');
+      if (response.statusCode == 200) {
+        return Pokemon.fromJson(response.data);
+      } else {
+        throw Exception('Failed to load pokemon: $name');
+      }
+    } catch (e) {
+      throw Exception('Error fetching pokemon: $e');
     }
   }
 }
